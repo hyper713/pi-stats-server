@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify ,render_template
 import sqlite3
 import sys
 import time
@@ -8,8 +8,44 @@ database = 'pi-stats.db'
 app_key = "Wd8TrB3G36gf7pf"
 separator = "|~|"
 
-
 @app.route('/', methods=['GET'])
+def index():
+    recent=[]
+    try:
+        connection = sqlite3.connect(database)
+
+        cursor1 = connection.cursor()
+        cursor1.execute("SELECT * FROM stats ORDER BY time DESC LIMIT 1")
+        recent = cursor1.fetchone()
+
+        cursor2 = connection.cursor()
+        cursor2.execute("SELECT ROUND(AVG(temp), 2), ROUND(AVG(rh), 2), DATE(time) FROM stats GROUP BY DATE(time)")
+        rows = cursor2.fetchall()
+
+        connection.commit()
+        connection.close()
+
+    except sqlite3.Error as e:
+        file = open('log.txt', 'a')
+        file.write(time.strftime("%Y-%m-%d %H:%M:%S") +
+                   separator+"Database Error"+separator+"%s" % e)
+        file.write('\n')
+        file.close()
+        return jsonify({"msg": "database error"})
+
+    temps, rhs, dates = [], [], []
+
+    for i in range(len(rows)):
+        temps.append(rows[i][0])
+        rhs.append(rows[i][1])
+        dates.append(rows[i][2])
+
+    if recent is None :
+        return render_template('index.html', temp='0', rh='0', time='0000-00-00 00:00:00', temps='', rhs='', dates='')
+
+    return render_template('index.html', temp=recent[0], rh=recent[1], time=recent[2], temps=temps, rhs=rhs, dates=dates)
+
+@app.route('/output', methods=['GET'])
 def output():
     rows = []
     try:
@@ -30,7 +66,7 @@ def output():
         file.close()
         return jsonify({"msg": "database error"})
 
-    return jsonify({"temp": rows})
+    return jsonify(rows)
 
 
 @app.route('/input', methods=['POST'])
@@ -95,8 +131,7 @@ def reset():
             return jsonify({"msg": "database error"})
 
         file = open('log.txt', 'a')
-        file.write(time.strftime("%Y-%m-%d %H:%M:%S")+separator +
-                   "Database Reset"+separator+"database reset succeed")
+        file.write(time.strftime("%Y-%m-%d %H:%M:%S")+separator +"Database Reset"+separator+"database reset succeed")
         file.write('\n')
         file.close()
         return jsonify({"msg": "Well reset"})
@@ -105,4 +140,4 @@ def reset():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='192.168.1.127', debug=True)

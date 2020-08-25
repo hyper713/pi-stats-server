@@ -1,0 +1,145 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="60">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+  <style>
+    html {
+      font-family: Arial;
+      display: inline-block;
+      margin: 0px auto;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 3.0rem;
+    }
+
+    p {
+      font-size: 3.0rem;
+    }
+
+    .units {
+      font-size: 1.2rem;
+    }
+
+    .dht-labels {
+      font-size: 1.5rem;
+      vertical-align: middle;
+      padding-bottom: 5px;
+    }
+
+    .time {
+      font-size: 1rem
+    }
+
+    .button {
+      background-color: #555555;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 40px 2px;
+      cursor: pointer;
+    }
+
+  </style>
+  <title>DHT22 Server</title>
+</head>
+
+<body>
+  <h2>DHT22 Server</h2>
+  <p>
+    <i class="fas fa-thermometer-half" style="color:#ff0000;"></i>
+    <span class="dht-labels">Temperature</span>
+    <span id="temperature">{{temp}}</span>
+    <sup class="units">&deg;C</sup>
+  </p>
+  <p>
+    <i class="fas fa-tint" style="color:#00add6;"></i>
+    <span class="dht-labels">Humidity</span>
+    <span id="humidity">{{rh}}</span>
+    <sup class="units">%</sup>
+  </p>
+  <p class="time">
+    <span>Updated at</span>
+    <span>{{time}}</span>
+  </p>
+  <div>
+    <canvas id="temp-chart" width="400" height="400"></canvas>
+  </div>
+  <div>
+    <canvas id="rh-chart" width="400" height="400"></canvas>
+  </div>
+  <button class="button" onclick="reset()">Reset Stats</button>
+</body>
+
+<script>
+  var temp = document.getElementById('temp-chart').getContext('2d');
+  var TempChart = new Chart(temp, {
+    type: 'line',
+    data: {
+      labels: {{ dates | tojson}},
+  datasets: [{
+    data: {{ temps | tojson}},
+    label: " Temperature (°C)",
+    borderColor: "#ff0000",
+    fill: false
+      }
+  ]
+  },
+  options: {
+    title: {
+      display: true,
+        text: 'Temperature per Day'
+    }
+  }
+});
+
+  var rh = document.getElementById('rh-chart').getContext('2d');
+  var rhChart = new Chart(rh, {
+    type: 'line',
+    data: {
+      labels: {{ dates | tojson}},
+  datasets: [{
+    data: {{ rhs | tojson}},
+    label: "  Humidity (%)",
+    borderColor: "#00add6",
+    fill: false
+      }
+  ]
+  },
+  options: {
+    title: {
+      display: true,
+        text: ' Humidity per Day'
+    }
+  }
+});
+
+  function reset() {
+
+  var result = confirm("Confirm the reset!"); 
+  if (result == true) { 
+
+    let xhr = new XMLHttpRequest(); 
+    let url = "/reset"; 
+
+    xhr.open("POST", url); 
+
+    xhr.setRequestHeader("Content-Type", "application/json"); 
+
+    var data = JSON.stringify({"key" : "Wd8TrB3G36gf7pf"}); 
+    xhr.send(data);
+  }
+}
+
+</script>
+
+</html>
