@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify ,render_template
+from flask import Flask, request, jsonify, render_template
 import sqlite3
 import sys
 import time
@@ -8,9 +8,10 @@ database = 'pi-stats.db'
 app_key = "Wd8TrB3G36gf7pf"
 separator = "|~|"
 
+
 @app.route('/', methods=['GET'])
 def index():
-    recent=[]
+    recent = []
     try:
         connection = sqlite3.connect(database)
 
@@ -19,7 +20,8 @@ def index():
         recent = cursor1.fetchone()
 
         cursor2 = connection.cursor()
-        cursor2.execute("SELECT ROUND(AVG(temp), 2), ROUND(AVG(rh), 2), DATE(time) FROM stats GROUP BY DATE(time)")
+        cursor2.execute(
+            "SELECT ROUND(AVG(temp), 2), ROUND(AVG(rh), 2), DATE(time) FROM stats GROUP BY DATE(time)")
         rows = cursor2.fetchall()
 
         connection.commit()
@@ -40,10 +42,11 @@ def index():
         rhs.append(rows[i][1])
         dates.append(rows[i][2])
 
-    if recent is None :
+    if recent is None:
         return render_template('index.html', temp='0', rh='0', time='0000-00-00 00:00:00', temps='', rhs='', dates='')
 
     return render_template('index.html', temp=recent[0], rh=recent[1], time=recent[2], temps=temps, rhs=rhs, dates=dates)
+
 
 @app.route('/output', methods=['GET'])
 def output():
@@ -131,7 +134,8 @@ def reset():
             return jsonify({"msg": "database error"})
 
         file = open('log.txt', 'a')
-        file.write(time.strftime("%Y-%m-%d %H:%M:%S")+separator +"Database Reset"+separator+"database reset succeed")
+        file.write(time.strftime("%Y-%m-%d %H:%M:%S")+separator +
+                   "Database Reset"+separator+"database reset succeed")
         file.write('\n')
         file.close()
         return jsonify({"msg": "Well reset"})

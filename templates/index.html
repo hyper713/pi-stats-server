@@ -48,7 +48,6 @@
       margin: 40px 2px;
       cursor: pointer;
     }
-
   </style>
   <title>DHT22 Server</title>
 </head>
@@ -125,20 +124,20 @@
 
   function reset() {
 
-  var result = confirm("Confirm the reset!"); 
-  if (result == true) { 
+    var result = confirm("Confirm the reset!");
+    if (result == true) {
 
-    let xhr = new XMLHttpRequest(); 
-    let url = "/reset"; 
+      let xhr = new XMLHttpRequest();
+      let url = "/reset";
 
-    xhr.open("POST", url); 
+      xhr.open("POST", url);
 
-    xhr.setRequestHeader("Content-Type", "application/json"); 
+      xhr.setRequestHeader("Content-Type", "application/json");
 
-    var data = JSON.stringify({"key" : "Wd8TrB3G36gf7pf"}); 
-    xhr.send(data);
+      var data = JSON.stringify({ "key": "Wd8TrB3G36gf7pf" });
+      xhr.send(data);
+    }
   }
-}
 
 </script>
 
